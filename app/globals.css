@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: oklch(0.99 0.01 75);
+  --color-foreground: oklch(0.2 0.01 260);
+  --color-accent: oklch(0.55 0.2 250);
+  --color-card: #ffffff;
+  --font-sans: var(--font-space-grotesk), sans-serif;
+  --font-mono: var(--font-roboto-mono), monospace;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
