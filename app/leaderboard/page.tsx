@@ -37,7 +37,7 @@ export default async function LeaderboardPage() {
               <div className="w-32 text-right">Score</div>
             </div>
             
-            {scores.map((entry, i) => (
+            {scores.map((entry: any, i: number) => (
               <div 
                 key={entry.id} 
                 className={`flex items-center p-4 rounded-xl transition-all hover:bg-slate-50 border border-transparent hover:border-slate-100
