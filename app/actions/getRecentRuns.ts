@@ -21,7 +21,7 @@ export async function getRecentRuns() {
       return [];
     }
 
-    return leaderboards.map((entry) => {
+    return leaderboards.map((entry: any) => {
       const name = entry.user?.hackerId || entry.user?.name || "Anonymous_Hacker";
       return `${name} completed a run with score: ${entry.score}/400`;
     });
