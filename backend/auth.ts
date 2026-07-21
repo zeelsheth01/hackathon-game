@@ -1,12 +1,20 @@
 import { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "./db";
+import clientPromise from "./mongodb";
+import User from "./models/User";
+import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+// Ensure Mongoose is connected for CredentialsProvider
+const connectMongoose = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+  await mongoose.connect(process.env.DATABASE_URL as string);
+};
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: MongoDBAdapter(clientPromise) as any,
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID as string,
@@ -24,9 +32,8 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing credentials");
         }
 
-        const user = await prisma.user.findFirst({
-          where: { hackerId: credentials.hackerId }
-        });
+        await connectMongoose();
+        const user = await User.findOne({ hackerId: credentials.hackerId });
 
         if (!user || user.hackerId !== credentials.hackerId || !user.password) {
           throw new Error("Invalid credentials");
@@ -45,45 +52,40 @@ export const authOptions: NextAuthOptions = {
   events: {
     async createUser({ user }) {
       if (!(user as any).hackerId) {
-        // Generate a random hackerId for new Github users
+        await connectMongoose();
         const newHackerId = `HACK-${Math.floor(1000 + Math.random() * 9000)}`;
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { hackerId: newHackerId }
-        });
+        await User.updateOne(
+          { _id: user.id },
+          { $set: { hackerId: newHackerId } }
+        );
       }
     }
   },
   callbacks: {
     async jwt({ token, account, user }) {
-      // If logging in via OAuth, we get the account object with access_token
       if (account && account.provider === 'github') {
         token.accessToken = account.access_token;
       }
       
-      // When user first signs in (both GitHub and Credentials)
       if (user) {
-         // Fallback to fetching hackerId if missing
          if (!(user as any).hackerId) {
-            const dbUser = await prisma.user.findUnique({ where: { id: user.id }});
+            await connectMongoose();
+            const dbUser = await User.findById(user.id);
             token.hackerId = dbUser?.hackerId;
          } else {
             token.hackerId = (user as any).hackerId;
          }
 
-         // If they logged in via credentials, we didn't get an 'account' from the provider in this request.
-         // We must manually fetch their linked GitHub account to get the access token.
          if (!account || account.provider !== 'github') {
-           const githubAccount = await prisma.account.findFirst({
-             where: { userId: user.id, provider: 'github' }
-           });
+           const client = await clientPromise;
+           const githubAccount = await client.db().collection('accounts').findOne({ userId: new mongoose.Types.ObjectId(user.id), provider: 'github' });
            if (githubAccount && githubAccount.access_token) {
              token.accessToken = githubAccount.access_token;
            }
          }
       } else if (!token.hackerId && token.sub) {
-        // Fallback for subsequent token refreshes if token somehow missed hackerId
-        const dbUser = await prisma.user.findUnique({ where: { id: token.sub }});
+        await connectMongoose();
+        const dbUser = await User.findById(token.sub);
         if (dbUser?.hackerId) {
           token.hackerId = dbUser.hackerId;
         }

@@ -1,16 +1,16 @@
-﻿import { prisma } from "@/backend/db";
 import Link from "next/link";
+import axios from "axios";
 
 export const revalidate = 0; // Disable cache so it's always fresh
 
 export default async function LeaderboardPage() {
-  const scores = await prisma.leaderboard.findMany({
-    take: 50,
-    orderBy: { score: 'desc' },
-    include: {
-      user: { select: { name: true } }
-    }
-  });
+  let scores: any[] = [];
+  try {
+    const res = await axios.get("http://localhost:5000/api/leaderboard/top");
+    scores = res.data;
+  } catch (err) {
+    console.error("Failed to fetch leaderboard", err);
+  }
 
   return (
     <main className="min-h-screen p-6 max-w-4xl mx-auto flex flex-col">
@@ -56,7 +56,7 @@ export default async function LeaderboardPage() {
                 </div>
                 
                 <div className="flex-1 font-bold text-lg text-slate-700">
-                  {entry.user.name || "Anonymous Hacker"}
+                  {entry.userId?.name || entry.userId?.hackerId || "Anonymous Hacker"}
                 </div>
                 
                 <div className="w-32 text-right font-black text-2xl text-slate-800 font-mono">

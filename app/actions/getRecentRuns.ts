@@ -1,28 +1,18 @@
-﻿"use server";
+"use server";
 
-import { prisma } from "@/backend/db";
+import axios from "axios";
 
 export async function getRecentRuns() {
   try {
-    const leaderboards = await prisma.leaderboard.findMany({
-      take: 10,
-      orderBy: { createdAt: "desc" },
-      include: {
-        user: {
-          select: {
-            name: true,
-            hackerId: true,
-          },
-        },
-      },
-    });
+    const res = await axios.get("http://localhost:5000/api/leaderboard/recent");
+    const leaderboards = res.data;
 
     if (leaderboards.length === 0) {
       return [];
     }
 
     return leaderboards.map((entry: any) => {
-      const name = entry.user?.hackerId || entry.user?.name || "Anonymous_Hacker";
+      const name = entry.userId?.hackerId || entry.userId?.name || "Anonymous_Hacker";
       return `${name} completed a run with score: ${entry.score}/400`;
     });
   } catch (error) {
