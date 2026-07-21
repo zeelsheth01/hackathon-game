@@ -1,19 +1,52 @@
-﻿import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/backend/auth";
 import { NextResponse } from "next/server";
+import User from "@/backend/models/User";
+import { connectToDatabase } from "@/backend/mongodb";
 
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || !(session as any).accessToken) {
-      return NextResponse.json(
-        { error: "Unauthorized. Please sign in with GitHub." },
-        { status: 401 }
-      );
+    let accessToken = (session as any).accessToken;
+
+    if (!accessToken) {
+      await connectToDatabase();
+      const user = await User.findOne({ hackerId: (session.user as any).hackerId });
+      if (user && user.githubToken) {
+        accessToken = user.githubToken;
+      } else {
+        return NextResponse.json(
+          { error: "Unauthorized. Please sign in with GitHub or link your account." },
+          { status: 401 }
+        );
+      }
     }
 
-    const accessToken = (session as any).accessToken;
+    if (accessToken === "mock_token") {
+      return NextResponse.json({
+        repos: [
+          {
+            id: 1,
+            name: "hackathon-game-mock",
+            fullName: "testhacker/hackathon-game-mock",
+            url: "https://github.com/testhacker/hackathon-game-mock",
+            private: false,
+            updatedAt: new Date().toISOString(),
+            language: "TypeScript"
+          },
+          {
+            id: 2,
+            name: "awesome-project",
+            fullName: "testhacker/awesome-project",
+            url: "https://github.com/testhacker/awesome-project",
+            private: true,
+            updatedAt: new Date().toISOString(),
+            language: "Python"
+          }
+        ]
+      });
+    }
 
     const response = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
       headers: {

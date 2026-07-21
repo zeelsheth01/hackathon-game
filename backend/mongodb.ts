@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
 if (!process.env.DATABASE_URL) {
   throw new Error('Invalid/Missing environment variable: "DATABASE_URL"');
@@ -26,3 +27,24 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export default clientPromise;
+
+let isConnected = false;
+
+export const connectToDatabase = async () => {
+  if (isConnected) {
+    return;
+  }
+  
+  try {
+    if (!uri) {
+      throw new Error('Invalid/Missing environment variable: "DATABASE_URL"');
+    }
+    
+    await mongoose.connect(uri);
+    isConnected = true;
+    console.log('Mongoose connected successfully');
+  } catch (error) {
+    console.error('Mongoose connection error:', error);
+    throw error;
+  }
+};

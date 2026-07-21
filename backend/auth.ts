@@ -44,7 +44,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        return user;
+        return {
+          id: user._id.toString(),
+          hackerId: user.hackerId,
+          name: user.name,
+          email: user.email,
+        } as any;
       }
     })
   ],
@@ -77,8 +82,8 @@ export const authOptions: NextAuthOptions = {
          }
 
          if (!account || account.provider !== 'github') {
-           const client = await clientPromise;
-           const githubAccount = await client.db().collection('accounts').findOne({ userId: new mongoose.Types.ObjectId(user.id), provider: 'github' });
+           await connectMongoose();
+           const githubAccount = await mongoose.connection.db?.collection('accounts').findOne({ userId: new mongoose.Types.ObjectId(user.id), provider: 'github' });
            if (githubAccount && githubAccount.access_token) {
              token.accessToken = githubAccount.access_token;
            }

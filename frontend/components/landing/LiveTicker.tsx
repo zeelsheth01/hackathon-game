@@ -23,10 +23,9 @@ export function LiveTicker({ initialRuns }: { initialRuns: string[] }) {
   }, [tickerItems.length]);
 
   return (
-    <div className="w-full bg-blue-600/10 border-t border-blue-500/20 py-2 overflow-hidden flex items-center relative z-20 backdrop-blur-md">
-      <div className="px-4 font-bold text-blue-400 text-xs tracking-wider uppercase border-r border-blue-500/30 flex-shrink-0 z-10 bg-slate-950/50 h-full flex items-center">
-        Live Feed
-        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse ml-2" />
+    <div className="w-full bg-canvas border-t border-hairline py-3 overflow-hidden flex items-center relative z-20">
+      <div className="px-4 font-bold text-ink text-[14px] uppercase border-r border-hairline flex-shrink-0 z-10 h-full flex items-center bg-canvas">
+        [+] Live
       </div>
       
       <div className="flex-1 overflow-hidden relative flex">
@@ -37,9 +36,9 @@ export function LiveTicker({ initialRuns }: { initialRuns: string[] }) {
         >
           {/* Double the items to create a seamless infinite loop */}
           {[...tickerItems, ...tickerItems].map((run, i) => (
-            <span key={i} className="mx-8 text-slate-300 font-mono text-sm inline-flex items-center">
+            <span key={i} className="mx-8 text-body text-[14px] inline-flex items-center">
               {run}
-              <span className="mx-8 text-slate-700">|</span>
+              <span className="mx-8 text-mute">|</span>
             </span>
           ))}
         </motion.div>
