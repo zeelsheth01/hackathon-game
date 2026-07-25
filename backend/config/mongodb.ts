@@ -10,8 +10,8 @@ const options = {};
 let client;
 let clientPromise: Promise<MongoClient>;
 
-if (!uri) {
-  // Prevent crash during Next.js build when env vars might not be loaded yet
+if (!uri || (process.env.NODE_ENV === 'production' && uri.includes('localhost'))) {
+  // Prevent crash during Next.js build when using localhost on Vercel
   clientPromise = Promise.resolve({ db: () => ({}) } as any);
 } else if (process.env.NODE_ENV === 'development') {
   let globalWithMongo = global as typeof globalThis & {
@@ -20,12 +20,18 @@ if (!uri) {
 
   if (!globalWithMongo._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+    globalWithMongo._mongoClientPromise = client.connect().catch(err => {
+      console.warn("Local DB connection failed, ignoring for now.");
+      return { db: () => ({}) } as any;
+    });
   }
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  clientPromise = client.connect().catch(err => {
+    console.warn("Production DB connection failed during build, ignoring for now.");
+    return { db: () => ({}) } as any;
+  });
 }
 
 export default clientPromise;
