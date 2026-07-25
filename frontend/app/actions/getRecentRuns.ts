@@ -4,7 +4,8 @@ import axios from "axios";
 
 export async function getRecentRuns() {
   try {
-    const res = await axios.get("http://localhost:5000/api/leaderboard/recent");
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+    const res = await axios.get(`${backendUrl}/api/leaderboard/recent`);
     const leaderboards = res.data;
 
     if (leaderboards.length === 0) {

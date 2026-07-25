@@ -6,7 +6,8 @@ export const revalidate = 0; // Disable cache so it's always fresh
 export default async function LeaderboardPage() {
   let scores: any[] = [];
   try {
-    const res = await axios.get("http://localhost:5000/api/leaderboard/top");
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+    const res = await axios.get(`${backendUrl}/api/leaderboard/top`);
     scores = res.data;
   } catch (err) {
     console.error("Failed to fetch leaderboard", err);
