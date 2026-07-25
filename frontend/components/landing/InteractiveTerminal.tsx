@@ -71,8 +71,8 @@ export function InteractiveTerminal() {
             </span>
             <motion.span 
               className="w-2.5 h-5 bg-accent inline-block"
-              animate={{ opacity: [1, 0] }}
-              transition={{ duration: 0.8, repeat: Infinity, ease: "steps(2)" }}
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
             />
           </motion.div>
 
