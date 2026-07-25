@@ -10,6 +10,7 @@ interface GameState {
   playerProfile: PlayerProfile | null;
   pace: Pace | null;
   scoreEvaluation: ScoreEvaluation | null;
+  linkedRepoName?: string;
   
   // Actions
   setPhase: (phase: GamePhase) => void;
@@ -20,6 +21,7 @@ interface GameState {
   setPlayerProfile: (profile: PlayerProfile) => void;
   setPace: (pace: Pace) => void;
   setScoreEvaluation: (evaluation: ScoreEvaluation) => void;
+  setLinkedRepoName: (name: string) => void;
   resetGame: () => void;
 }
 
@@ -41,6 +43,7 @@ export const useGameStore = create<GameState>()(
       playerProfile: null,
       pace: null,
       scoreEvaluation: null,
+      linkedRepoName: undefined,
 
       setPhase: (phase) => set({ phase }),
       updateScore: (newScore) => set((state) => ({ score: { ...state.score, ...newScore } })),
@@ -54,6 +57,7 @@ export const useGameStore = create<GameState>()(
       setPlayerProfile: (profile) => set({ playerProfile: profile }),
       setPace: (pace) => set({ pace }),
       setScoreEvaluation: (evaluation) => set({ scoreEvaluation: evaluation }),
+      setLinkedRepoName: (name) => set({ linkedRepoName: name }),
       resetGame: () => set({
         phase: GamePhase.REGISTRATION,
         score: { ...initialScore },

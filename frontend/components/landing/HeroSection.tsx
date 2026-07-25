@@ -17,8 +17,8 @@ export function HeroSection() {
           </p>
           <div className="flex items-center gap-4">
             <Link href="/auth/signin">
-              <button className="bg-primary text-on-primary font-medium text-[16px] leading-[2] rounded-sm px-[20px] py-[4px] h-[36px] hover:bg-ink-deep transition-colors">
-                Enter Simulation
+              <button className="bg-primary text-on-primary font-bold text-[16px] leading-[2] rounded-sm px-[24px] py-[4px] h-[40px] hover:bg-ink-deep hover:shadow-lg transition-all flex items-center gap-2 group">
+                <span className="text-accent opacity-70 font-mono group-hover:opacity-100 transition-opacity">{'>'}</span> Start Hacking <span className="font-mono animate-pulse inline-block w-2 h-4 bg-on-primary ml-1 opacity-80"></span>
               </button>
             </Link>
           </div>

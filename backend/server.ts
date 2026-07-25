@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load environment variables from .env.local if present, else .env
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,20 +17,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Connect to MongoDB
-const connectDB = async () => {
-  try {
-    const mongoURI = process.env.DATABASE_URL || 'mongodb://localhost:27017/hackathon_game';
-    // Remove unsupported options
-    await mongoose.connect(mongoURI);
-    console.log('MongoDB connected successfully');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
-  }
-};
+import { connectToDatabase } from './config/mongodb';
 
-connectDB();
+connectToDatabase();
 
 // API Routes (to be mounted)
 import gameRoutes from './routes/game.routes';
