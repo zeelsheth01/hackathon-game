@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch server.ts",
-    "start": "tsx server.ts"
+    "start": "tsx server.ts",
+    "build": "echo 'No build step for backend'"
   },
   "dependencies": {
     "@google/genai": "^2.10.0",
