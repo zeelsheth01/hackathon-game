@@ -4,7 +4,7 @@ const steps = [
   {
     step: "01",
     title: "Authenticate",
-    description: "Log in with your GitHub account to create your hacker identity.",
+    description: "Create your hacker identity by registering an account.",
   },
   {
     step: "02",

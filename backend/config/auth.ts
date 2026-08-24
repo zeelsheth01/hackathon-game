@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
-import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import clientPromise from "./mongodb";
 import User from "../models/User";
@@ -16,26 +15,21 @@ const connectMongoose = async () => {
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise) as any,
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
-      authorization: { params: { scope: 'read:user user:email repo' } },
-    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        hackerId: { label: "Game ID", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.hackerId || !credentials?.password) {
+        if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing credentials");
         }
 
         await connectMongoose();
-        const user = await User.findOne({ hackerId: credentials.hackerId });
+        const user = await User.findOne({ email: credentials.email });
 
-        if (!user || user.hackerId !== credentials.hackerId || !user.password) {
+        if (!user || !user.password) {
           throw new Error("Invalid credentials");
         }
 
@@ -54,40 +48,10 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   session: { strategy: "jwt" },
-  events: {
-    async createUser({ user }) {
-      if (!(user as any).hackerId) {
-        await connectMongoose();
-        const newHackerId = `HACK-${Math.floor(1000 + Math.random() * 9000)}`;
-        await User.updateOne(
-          { _id: user.id },
-          { $set: { hackerId: newHackerId } }
-        );
-      }
-    }
-  },
   callbacks: {
-    async jwt({ token, account, user }) {
-      if (account && account.provider === 'github') {
-        token.accessToken = account.access_token;
-      }
-      
+    async jwt({ token, user }) {
       if (user) {
-         if (!(user as any).hackerId) {
-            await connectMongoose();
-            const dbUser = await User.findById(user.id);
-            token.hackerId = dbUser?.hackerId;
-         } else {
-            token.hackerId = (user as any).hackerId;
-         }
-
-         if (!account || account.provider !== 'github') {
-           await connectMongoose();
-           const githubAccount = await mongoose.connection.db?.collection('accounts').findOne({ userId: new mongoose.Types.ObjectId(user.id), provider: 'github' });
-           if (githubAccount && githubAccount.access_token) {
-             token.accessToken = githubAccount.access_token;
-           }
-         }
+        token.hackerId = (user as any).hackerId;
       } else if (!token.hackerId && token.sub) {
         await connectMongoose();
         const dbUser = await User.findById(token.sub);
@@ -95,14 +59,12 @@ export const authOptions: NextAuthOptions = {
           token.hackerId = dbUser.hackerId;
         }
       }
-      
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
         (session.user as any).id = token.sub;
         (session.user as any).hackerId = token.hackerId;
-        (session as any).accessToken = token.accessToken;
       }
       return session;
     }

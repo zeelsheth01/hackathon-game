@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
@@ -15,21 +15,77 @@ export default function SignInPage() {
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaultTab = searchParams.get("tab") === "login" ? "login" : "register";
-  const [activeTab, setActiveTab] = useState<"register" | "login">(defaultTab);
-  const [isGithubLoading, setIsGithubLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"register" | "login">("register");
+  
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "login" || tabParam === "register") {
+      setActiveTab(tabParam);
+    } else {
+      const hasRegistered = localStorage.getItem("hasRegistered");
+      if (hasRegistered === "true") {
+        setActiveTab("login");
+      }
+    }
+  }, [searchParams]);
+
   const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     email: "",
-    hackerId: "",
     password: ""
   });
 
-  const handleGithubLogin = async () => {
-    setIsGithubLoading(true);
-    await signIn("github", { callbackUrl: "/auth/complete-registration" });
+  const [isRegisterLoading, setIsRegisterLoading] = useState(false);
+  const [registerSuccess, setRegisterSuccess] = useState("");
+
+  const [registerFormData, setRegisterFormData] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setRegisterSuccess("");
+    setIsRegisterLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registerFormData),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Registration failed");
+        setIsRegisterLoading(false);
+        return;
+      }
+
+      setRegisterSuccess(`Registered successfully! Your Game ID is: ${data.hackerId}. Logging you in...`);
+      localStorage.setItem("hasRegistered", "true");
+      
+      // Auto-login after registration
+      const result = await signIn("credentials", {
+        email: registerFormData.email,
+        password: registerFormData.password,
+        redirect: false
+      });
+
+      if (result?.error) {
+        setError("Registration successful, but auto-login failed. Please sign in with your Email.");
+        setIsRegisterLoading(false);
+      } else {
+        router.push("/game");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred during registration.");
+      setIsRegisterLoading(false);
+    }
   };
 
   const handleCredentialsLogin = async (e: React.FormEvent) => {
@@ -39,7 +95,7 @@ function SignInContent() {
     
     try {
       const result = await signIn("credentials", {
-        hackerId: formData.hackerId,
+        email: formData.email,
         password: formData.password,
         redirect: false
       });
@@ -90,19 +146,62 @@ function SignInContent() {
         </div>
 
         {activeTab === "register" ? (
-          <div className="space-y-6">
-            <div className="bg-surface-soft border border-hairline rounded-sm p-4 text-[14px] text-ink">
-              New players must link their GitHub account to fetch live repositories.
-            </div>
+          <form onSubmit={handleRegister} className="space-y-6">
+            {error && (
+              <div className="bg-surface-soft border border-danger rounded-sm p-3 text-[14px] text-danger">
+                {error}
+              </div>
+            )}
+            {registerSuccess && (
+              <div className="bg-surface-soft border border-primary rounded-sm p-3 text-[14px] text-primary">
+                {registerSuccess}
+              </div>
+            )}
             
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[14px] font-medium text-ink mb-1">Name (Optional)</label>
+                <input 
+                  type="text"
+                  placeholder="John Doe"
+                  value={registerFormData.name}
+                  onChange={e => setRegisterFormData({...registerFormData, name: e.target.value})}
+                  className="w-full bg-surface-soft text-ink border border-hairline rounded-sm py-2 px-3 text-[16px] focus:bg-canvas focus:border-ink focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-medium text-ink mb-1">Email</label>
+                <input 
+                  type="email"
+                  placeholder="hacker@example.com"
+                  required
+                  value={registerFormData.email}
+                  onChange={e => setRegisterFormData({...registerFormData, email: e.target.value})}
+                  className="w-full bg-surface-soft text-ink border border-hairline rounded-sm py-2 px-3 text-[16px] focus:bg-canvas focus:border-ink focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-medium text-ink mb-1">Password</label>
+                <input 
+                  type="password"
+                  required
+                  value={registerFormData.password}
+                  onChange={e => setRegisterFormData({...registerFormData, password: e.target.value})}
+                  className="w-full bg-surface-soft text-ink border border-hairline rounded-sm py-2 px-3 text-[16px] focus:bg-canvas focus:border-ink focus:outline-none transition-colors"
+                />
+              </div>
+            </div>
+
             <button
-              onClick={handleGithubLogin}
-              disabled={isGithubLoading}
+              type="submit"
+              disabled={isRegisterLoading}
               className="w-full bg-primary text-on-primary font-medium text-[16px] leading-[2] rounded-sm py-1 px-4 hover:bg-ink-deep transition-colors disabled:opacity-50"
             >
-              {isGithubLoading ? "Connecting..." : "Continue with GitHub"}
+              {isRegisterLoading ? "Registering..." : "Create Account"}
             </button>
-          </div>
+          </form>
         ) : (
           <form onSubmit={handleCredentialsLogin} className="space-y-6">
             {error && (
@@ -113,13 +212,13 @@ function SignInContent() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-[14px] font-medium text-ink mb-1">Game ID</label>
+                <label className="block text-[14px] font-medium text-ink mb-1">Email</label>
                 <input 
-                  type="text"
-                  placeholder="HACK-XXXX"
+                  type="email"
+                  placeholder="hacker@example.com"
                   required
-                  value={formData.hackerId}
-                  onChange={e => setFormData({...formData, hackerId: e.target.value})}
+                  value={formData.email}
+                  onChange={e => setFormData({...formData, email: e.target.value})}
                   className="w-full bg-surface-soft text-ink border border-hairline rounded-sm py-2 px-3 text-[16px] focus:bg-canvas focus:border-ink focus:outline-none transition-colors"
                 />
               </div>

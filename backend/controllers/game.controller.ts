@@ -56,13 +56,14 @@ export const scoreGame = async (req: any, res: any) => {
     const accessToken = req.accessToken;
 
     let commitsRes = { ok: false, status: 401, json: async () => [] };
-    if (accessToken) {
+    try {
       commitsRes = await fetch(`https://api.github.com/repos/${repoName}/commits?per_page=3`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
           Accept: "application/vnd.github.v3+json",
         },
       }) as any;
+    } catch (e) {
+      console.error("Error fetching commits:", e);
     }
 
     let commits: any[] = [];
@@ -76,14 +77,16 @@ export const scoreGame = async (req: any, res: any) => {
     if (commits.length > 0) {
       const latestCommitSha = commits[0].sha;
       let diffRes = { ok: false, text: async () => "" };
-      if (accessToken) {
+      try {
         diffRes = await fetch(`https://api.github.com/repos/${repoName}/commits/${latestCommitSha}`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
             Accept: "application/vnd.github.v3.diff",
           },
         }) as any;
+      } catch (e) {
+         console.error("Error fetching diff:", e);
       }
+      
       if (diffRes.ok) {
         const diffText = await diffRes.text();
         const truncatedDiff = diffText.slice(0, 15000); 
