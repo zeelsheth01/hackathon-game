@@ -30,6 +30,7 @@ export interface IProject extends Document {
   features: IFeature[];
   simulationRun?: ISimulationRun;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const TechSelectionSchema = new Schema<ITechSelection>({

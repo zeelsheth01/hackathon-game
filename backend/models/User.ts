@@ -9,6 +9,8 @@ export interface IUser extends Document {
   hackerId?: string;
   githubId?: string;
   githubToken?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema: Schema = new Schema({

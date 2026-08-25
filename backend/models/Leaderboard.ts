@@ -5,6 +5,7 @@ export interface ILeaderboard extends Document {
   score: number;
   rank?: number;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const LeaderboardSchema = new Schema<ILeaderboard>({
