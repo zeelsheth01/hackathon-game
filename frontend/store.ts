@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GamePhase, Problem, TechItem, GameScore, PlayerProfile, ScoreEvaluation, Pace } from '../shared/types';
+import { GamePhase, Problem, GameScore, PlayerProfile, ScoreEvaluation, Pace } from '../shared/types';
 
 interface GameState {
   phase: GamePhase;

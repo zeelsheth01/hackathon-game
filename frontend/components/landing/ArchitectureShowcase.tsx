@@ -28,7 +28,7 @@ export function ArchitectureShowcase() {
         </h2>
         
         <div className="flex flex-col">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <div
               key={feature.title}
               className="py-2 bg-canvas text-body text-[16px] flex flex-col md:flex-row gap-2 md:gap-4"

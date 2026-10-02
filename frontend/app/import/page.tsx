@@ -41,8 +41,8 @@ export default function ImportRepoPage() {
         throw new Error("URL must include the owner and repository name.");
       }
       parsedRepoName = `${parts[0]}/${parts[1]}`;
-    } catch (err: any) {
-      setError(err.message || "Invalid URL format.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Invalid URL format.");
       return;
     }
 
@@ -54,7 +54,7 @@ export default function ImportRepoPage() {
         body: JSON.stringify({
           repoUrl: repoUrl.trim(),
           repoName: parsedRepoName,
-          userId: (session?.user as any)?.id,
+          userId: (session?.user as { id?: string })?.id,
         }),
       });
 
@@ -67,9 +67,9 @@ export default function ImportRepoPage() {
       // Save linked repo name and navigate to dashboard
       setLinkedRepoName(parsedRepoName);
       router.push("/game/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      setError(`Error linking repository: ${error.message}`);
+      setError(`Error linking repository: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsLinking(false);
     }
@@ -113,7 +113,7 @@ export default function ImportRepoPage() {
                 required
               />
               <p className="text-[12px] text-mute">
-                Ensure your repository is public, or our AI judges won't be able to access your code.
+                Ensure your repository is public, or our AI judges won&apos;t be able to access your code.
               </p>
             </div>
 

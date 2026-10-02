@@ -36,7 +36,7 @@ export default function GameSetupPage() {
   } = useGameStore();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [handle, setHandle] = useState(playerProfile?.handle || (session?.user as any)?.hackerId || session?.user?.name || "");
+  const [handle, setHandle] = useState(playerProfile?.handle || (session?.user as { hackerId?: string })?.hackerId || session?.user?.name || "");
   const [title, setTitle] = useState(playerProfile?.title || "");
   const [avatarBg, setAvatarBg] = useState(playerProfile?.avatarBg || "Jasper");
   const [github, setGithub] = useState(playerProfile?.github || "");
@@ -72,7 +72,8 @@ export default function GameSetupPage() {
     } else if (status === "authenticated" && phase === GamePhase.REGISTRATION) {
       setPhase(GamePhase.PROFILE_FORM);
       if (!handle) {
-        setHandle((session?.user as any)?.hackerId || session?.user?.name || "");
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setHandle((session?.user as { hackerId?: string })?.hackerId || session?.user?.name || "");
       }
     }
   }, [status, phase, router, session, setPhase, handle]);
@@ -84,7 +85,7 @@ export default function GameSetupPage() {
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!handle) return;
-    setPlayerProfile({ id: (session?.user as any)?.id || 'guest', handle, title, avatarBg, github, discord });
+    setPlayerProfile({ id: (session?.user as { id?: string })?.id || 'guest', handle, title, avatarBg, github, discord });
     setPhase(GamePhase.TECH_STACK);
   };
 
@@ -172,7 +173,7 @@ export default function GameSetupPage() {
               </div>
               <div className="sm:text-right w-full sm:w-auto mt-4 sm:mt-0">
                 <div className="text-[12px] font-bold text-mute uppercase tracking-wider mb-0.5">Gamer ID</div>
-                <div className="font-mono font-bold text-ink text-[14px]">{(session?.user as any)?.hackerId || "Unknown"}</div>
+                <div className="font-mono font-bold text-ink text-[14px]">{(session?.user as { hackerId?: string })?.hackerId || "Unknown"}</div>
               </div>
 
               {showAvatarOptions && (
@@ -257,7 +258,7 @@ export default function GameSetupPage() {
         {phase === GamePhase.TECH_STACK && (
           <div className="bg-canvas border border-hairline p-8">
             <h2 className="text-[16px] font-bold text-ink mb-2">[+] Build Your Stack</h2>
-            <p className="text-[14px] text-body mb-8">Type the technologies you'll use (e.g. Next.js, Rust, Tailwind) and hit Enter.</p>
+            <p className="text-[14px] text-body mb-8">Type the technologies you&apos;ll use (e.g. Next.js, Rust, Tailwind) and hit Enter.</p>
             
             <form onSubmit={handleAddTech} className="mb-6 flex gap-2">
               <input
@@ -471,7 +472,7 @@ export default function GameSetupPage() {
                 onClick={() => router.push('/import')}
                 className="flex-[2] bg-primary text-on-primary font-bold py-2 text-[14px] hover:bg-ink-deep transition-colors"
               >
-                I Understand, Let's Hack!
+                I Understand, Let&apos;s Hack!
               </button>
             </div>
           </div>

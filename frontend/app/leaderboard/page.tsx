@@ -4,7 +4,7 @@ import axios from "axios";
 export const revalidate = 0; // Disable cache so it's always fresh
 
 export default async function LeaderboardPage() {
-  let scores: any[] = [];
+  let scores: { id: string, score: number, userId?: { name?: string, hackerId?: string } }[] = [];
   try {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
     const res = await axios.get(`${backendUrl}/api/leaderboard/top`);
@@ -39,7 +39,7 @@ export default async function LeaderboardPage() {
                 <div className="w-32 text-right">Score</div>
               </div>
               
-              {scores.map((entry: any, i: number) => (
+              {scores.map((entry: { id: string, score: number, userId?: { name?: string, hackerId?: string } }, i: number) => (
                 <div 
                   key={entry.id} 
                   className={`flex items-center p-4 transition-all border-b border-hairline last:border-b-0

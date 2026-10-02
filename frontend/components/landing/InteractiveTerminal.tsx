@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { Press_Start_2P } from 'next/font/google';
 
 const pixelFont = Press_Start_2P({
@@ -10,11 +8,6 @@ const pixelFont = Press_Start_2P({
   subsets: ['latin'],
 });
 
-interface TerminalLine {
-  id: number;
-  text: React.ReactNode;
-  isCommand?: boolean;
-}
 
 export function InteractiveTerminal() {
   return (
