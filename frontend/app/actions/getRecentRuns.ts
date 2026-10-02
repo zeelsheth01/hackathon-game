@@ -12,7 +12,7 @@ export async function getRecentRuns() {
       return [];
     }
 
-    return leaderboards.map((entry: any) => {
+    return leaderboards.map((entry: { score: number, userId?: { hackerId?: string, name?: string } }) => {
       const name = entry.userId?.hackerId || entry.userId?.name || "Anonymous_Hacker";
       return `${name} completed a run with score: ${entry.score}/400`;
     });

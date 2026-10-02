@@ -19,7 +19,7 @@ export default function CompleteRegistrationPage() {
     }
   }, [status, router]);
 
-  const hackerId = session?.user ? (session.user as any).hackerId || "HACK-XXXX" : "HACK-XXXX";
+  const hackerId = session?.user ? (session.user as { hackerId?: string }).hackerId || "HACK-XXXX" : "HACK-XXXX";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(hackerId);
@@ -56,7 +56,7 @@ export default function CompleteRegistrationPage() {
       } else {
         setError(data.error || "Failed to set password");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

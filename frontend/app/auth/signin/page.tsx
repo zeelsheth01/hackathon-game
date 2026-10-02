@@ -20,10 +20,12 @@ function SignInContent() {
   useEffect(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam === "login" || tabParam === "register") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTab(tabParam);
     } else {
       const hasRegistered = localStorage.getItem("hasRegistered");
       if (hasRegistered === "true") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveTab("login");
       }
     }
@@ -82,7 +84,7 @@ function SignInContent() {
       } else {
         router.push("/game");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred during registration.");
       setIsRegisterLoading(false);
     }
@@ -106,7 +108,7 @@ function SignInContent() {
       } else {
         router.push("/game");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
       setIsCredentialsLoading(false);
     }

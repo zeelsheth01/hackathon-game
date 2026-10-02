@@ -23,7 +23,7 @@ export default function ErrorBoundary({
       </div>
       <h1 className="text-3xl font-extrabold text-white mb-4">Critical System Failure</h1>
       <p className="text-slate-400 max-w-md mb-8">
-        The simulation encountered an unexpected runtime error. We've logged this event for the sysadmins.
+        The simulation encountered an unexpected runtime error. We&apos;ve logged this event for the sysadmins.
       </p>
       
       <div className="flex flex-col sm:flex-row gap-4">

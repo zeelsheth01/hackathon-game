@@ -7,7 +7,7 @@ import { useGameStore } from "@/frontend/store";
 import { Loader2, RefreshCw, Trophy, Star, Lightbulb, PenTool, Rocket, MessageSquare } from "lucide-react";
 
 export default function GameDashboardPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const { 
     selectedProblem, 
@@ -55,9 +55,9 @@ export default function GameDashboardPage() {
         modifiers: evaluation.score
       });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsScoring(false);
     }
@@ -119,9 +119,9 @@ export default function GameDashboardPage() {
             {scoreEvaluation && (
               <div className="bg-surface-soft border border-hairline rounded-sm p-6 shadow-sm">
                 <h3 className="text-[12px] font-bold text-mute uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" /> Judge's Feedback
+                  <MessageSquare className="w-4 h-4" /> Judge&apos;s Feedback
                 </h3>
-                <p className="text-ink leading-[1.6] text-[14px] italic">"{scoreEvaluation.feedback}"</p>
+                <p className="text-ink leading-[1.6] text-[14px] italic">&quot;{scoreEvaluation.feedback}&quot;</p>
               </div>
             )}
           </div>
