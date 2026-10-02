@@ -12,7 +12,7 @@ let clientPromise: Promise<MongoClient>;
 
 if (!uri || (process.env.NODE_ENV === 'production' && uri.includes('localhost'))) {
   // Prevent crash during Next.js build when using localhost on Vercel
-  clientPromise = Promise.resolve({ db: () => ({}) } as any);
+  clientPromise = Promise.resolve({ db: () => ({ collection: () => ({}) }) } as any);
 } else if (process.env.NODE_ENV === 'development') {
   let globalWithMongo = global as typeof globalThis & {
     _mongoClientPromise?: Promise<MongoClient>;

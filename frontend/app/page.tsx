@@ -4,7 +4,10 @@ import { GuidanceSection } from "@/frontend/components/landing/GuidanceSection";
 import { LiveTicker } from "@/frontend/components/landing/LiveTicker";
 import { getRecentRuns } from "@/app/actions/getRecentRuns";
 
+import { connection } from 'next/server';
+
 export default async function HomePage() {
+  await connection();
   const recentRuns = await getRecentRuns();
 
   return (
